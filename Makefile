@@ -46,10 +46,14 @@ $(EXE_DIR):
 CLIENT_DPN=$(OBJ_DIR)/client.o \
            $(OBJ_DIR)/msg_queue.o \
 		   $(OBJ_DIR)/named_pipe.o \
+		   $(OBJ_DIR)/sh_mem.o \
+		   $(OBJ_DIR)/sh_sem.o \
 
 SERVER_DPN=$(OBJ_DIR)/server.o \
            $(OBJ_DIR)/msg_queue.o \
 		   $(OBJ_DIR)/named_pipe.o \
+		   $(OBJ_DIR)/sh_mem.o \
+		   $(OBJ_DIR)/sh_sem.o \
 
 ####################################################################
 # Build instructions			 			   #
@@ -74,6 +78,13 @@ $(OBJ_DIR)/msg_queue.o: $(SRC_DIR)/msg_queue.c $(INCLUDE_DIR)/msg_queue.h
 $(OBJ_DIR)/named_pipe.o: $(SRC_DIR)/named_pipe.c $(INCLUDE_DIR)/named_pipe.h
 	gcc $(FLAGS) $(INCLUDEPATHS) -o $(OBJ_DIR)/named_pipe.o $(SRC_DIR)/named_pipe.c
 
+$(OBJ_DIR)/sh_mem.o: $(SRC_DIR)/sh_mem.c $(INCLUDE_DIR)/sh_mem.h
+	gcc $(FLAGS) $(INCLUDEPATHS) -o $(OBJ_DIR)/sh_mem.o $(SRC_DIR)/sh_mem.c
+
+$(OBJ_DIR)/sh_sem.o: $(SRC_DIR)/sh_sem.c $(INCLUDE_DIR)/sh_sem.h
+	gcc $(FLAGS) $(INCLUDEPATHS) -o $(OBJ_DIR)/sh_sem.o $(SRC_DIR)/sh_sem.c
+
+
 
 dox:
 	mkdir -p $(DOX_DIR)
@@ -86,6 +97,8 @@ splint:
 	splint $(SPLINTFLAGS) $(INCLUDEPATHS) $(SPLINCLUDEPATHS) $(SRC_DIR)/client.c
 	splint $(SPLINTFLAGS) $(INCLUDEPATHS) $(SPLINCLUDEPATHS) $(SRC_DIR)/msg_queue.c
 	splint $(SPLINTFLAGS) $(INCLUDEPATHS) $(SPLINCLUDEPATHS) $(SRC_DIR)/named_pipe.c
+	splint $(SPLINTFLAGS) $(INCLUDEPATHS) $(SPLINCLUDEPATHS) $(SRC_DIR)/sh_mem.c
+	splint $(SPLINTFLAGS) $(INCLUDEPATHS) $(SPLINCLUDEPATHS) $(SRC_DIR)/sh_sem.c
 
 clean:
 	rm -rf $(OBJ_DIR) $(DOX_DIR) $(EXE_DIR) $(OUT_DIR) 

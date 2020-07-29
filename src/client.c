@@ -27,6 +27,7 @@ int main (int argc, char *argv [])
 {
   msq_elem_t msgobj;
   named_pipe_t npobj;
+ 
   msg_send(&msgobj);
   printf("Klienti: %s\n",msgobj.msg);
   pipe_snd(msgobj.msg,&npobj);

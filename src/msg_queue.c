@@ -26,7 +26,7 @@ int msg_send(msq_elem_t *msg_obj)
 {
     int s_qid;
     char *pipe;
-    char *mypid = malloc(6);
+    char *mypid = malloc(8);
     
     if((s_qid = init_queue()) == -1)
     {
