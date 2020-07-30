@@ -67,6 +67,6 @@ int pipe_rcv(char* pipe_name,named_pipe_t *pipe_obj)
     }
 
     close(fd);
-    
+    unlink(pipe_name);
     return 1;
 }

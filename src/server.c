@@ -28,13 +28,13 @@ int main (int argc, char *argv [])
 
   if((r_qid = init_queue()) == -1)
   {
-      return (-1);
+      return 0;
   }
 
   if (shm_init (&shm_obj) == -1)
     {
       perror ("Error initiating the shared memory");
-      exit (-1);
+      exit(0);
     }
     
   
@@ -42,7 +42,7 @@ int main (int argc, char *argv [])
   {
     if(msg_rcv(&msg_obj)  == -1)
     {
-        return -1;
+        return 0;
     }
     
     
@@ -56,34 +56,38 @@ int main (int argc, char *argv [])
     
 
       /* enter the critical section */
-    if (sh_sem_lock (shm_obj.sem_id) == -1)
+    if(shm_obj.shm_ptr->state == SHM_EMPTY)
     {
-      perror ("Error entering the shared memory critical section");
-      exit (-1);
+      if (sh_sem_lock (shm_obj.sem_id) == -1)
+      {
+        perror ("Error entering the shared memory critical section");
+        exit (0);
+      }
+
+      strcpy (&shm_obj.shm_ptr->buffer [0], &buffer [0]);
+      shm_obj.shm_ptr->len = strlen (&buffer [0]);
+      
+      /* leave the critical section */
+      
+      (void) sh_sem_unlock (shm_obj.sem_id);
+
+      /* reset the input buffer */
+      memset (&buffer [0], 0x0, SHM_MSG_LEN);
+      shm_obj.shm_ptr->state = SHM_FULL;
     }
-
-    strcpy (&shm_obj.shm_ptr->buffer [0], &buffer [0]);
-    shm_obj.shm_ptr->len = strlen (&buffer [0]);
-    
-    /* leave the critical section */
-    
-    (void) sh_sem_unlock (shm_obj.sem_id);
-
-    /* reset the input buffer */
-    memset (&buffer [0], 0x0, SHM_MSG_LEN);
     if (sh_sem_lock (shm_obj.sem_id) == -1)
     {
       perror ("Error entering the shared memory critical section");
       exit (EXIT_FAILURE);
     }
-
+    
     if (shm_obj.shm_ptr->len > 0)
     {
       printf ("[message received]: '%s'\n", shm_obj.shm_ptr->buffer);
 
       /* reset the shared memory */
       memset (shm_obj.shm_ptr, 0x0, sizeof (shm_elm_t));
-      
+      shm_obj.shm_ptr->state = SHM_EMPTY;
       /* leave the critical section */
       (void) sh_sem_unlock (shm_obj.sem_id);
     }

@@ -41,7 +41,7 @@ int shm_init  (shared_mem_t *shm_obj)
     }
 
   shm_obj->shm_ptr->len = 0;
-
+  shm_obj->shm_ptr->state = SHM_EMPTY;
   /* instantiate and initialize the shared memory semaphore object */
   if ((shm_obj->sem_id = sh_sem_init (SHS_KEY)) == -1)
     {
