@@ -44,12 +44,14 @@ $(EXE_DIR):
 # SRCOBJ DEPENDENCIES				   #
 ####################################################################
 CLIENT_DPN=$(OBJ_DIR)/client.o \
+		   $(OBJ_DIR)/str_serialize.o \
            $(OBJ_DIR)/msg_queue.o \
 		   $(OBJ_DIR)/named_pipe.o \
 		   $(OBJ_DIR)/sh_mem.o \
 		   $(OBJ_DIR)/sh_sem.o \
 
 SERVER_DPN=$(OBJ_DIR)/server.o \
+		   $(OBJ_DIR)/str_serialize.o \
            $(OBJ_DIR)/msg_queue.o \
 		   $(OBJ_DIR)/named_pipe.o \
 		   $(OBJ_DIR)/sh_mem.o \
@@ -71,6 +73,9 @@ $(OBJ_DIR)/client.o: $(SRC_DIR)/client.c
 
 $(OBJ_DIR)/server.o: $(SRC_DIR)/server.c 
 	gcc $(FLAGS) $(INCLUDEPATHS) -o $(OBJ_DIR)/server.o $(SRC_DIR)/server.c 
+
+$(OBJ_DIR)/str_serialize.o: $(SRC_DIR)/str_serialize.c $(INCLUDE_DIR)/str_serialize.h
+	gcc $(FLAGS) $(INCLUDEPATHS) -o $(OBJ_DIR)/str_serialize.o $(SRC_DIR)/str_serialize.c
 
 $(OBJ_DIR)/msg_queue.o: $(SRC_DIR)/msg_queue.c $(INCLUDE_DIR)/msg_queue.h
 	gcc $(FLAGS) $(INCLUDEPATHS) -o $(OBJ_DIR)/msg_queue.o $(SRC_DIR)/msg_queue.c
