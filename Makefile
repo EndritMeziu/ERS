@@ -49,6 +49,8 @@ CLIENT_DPN=$(OBJ_DIR)/client.o \
 		   $(OBJ_DIR)/named_pipe.o \
 		   $(OBJ_DIR)/sh_mem.o \
 		   $(OBJ_DIR)/sh_sem.o \
+		   $(OBJ_DIR)/opt.o \
+		   $(OBJ_DIR)/patient.o \
 
 SERVER_DPN=$(OBJ_DIR)/server.o \
 		   $(OBJ_DIR)/str_serialize.o \
@@ -56,6 +58,8 @@ SERVER_DPN=$(OBJ_DIR)/server.o \
 		   $(OBJ_DIR)/named_pipe.o \
 		   $(OBJ_DIR)/sh_mem.o \
 		   $(OBJ_DIR)/sh_sem.o \
+		   $(OBJ_DIR)/opt.o \
+		   $(OBJ_DIR)/patient.o \
 
 ####################################################################
 # Build instructions			 			   #
@@ -89,6 +93,12 @@ $(OBJ_DIR)/sh_mem.o: $(SRC_DIR)/sh_mem.c $(INCLUDE_DIR)/sh_mem.h
 $(OBJ_DIR)/sh_sem.o: $(SRC_DIR)/sh_sem.c $(INCLUDE_DIR)/sh_sem.h
 	gcc $(FLAGS) $(INCLUDEPATHS) -o $(OBJ_DIR)/sh_sem.o $(SRC_DIR)/sh_sem.c
 
+$(OBJ_DIR)/opt.o: $(SRC_DIR)/opt.c $(INCLUDE_DIR)/opt.h
+	gcc $(FLAGS) $(INCLUDEPATHS) -o $(OBJ_DIR)/opt.o $(SRC_DIR)/opt.c
+
+$(OBJ_DIR)/patient.o: $(SRC_DIR)/patient.c $(INCLUDE_DIR)/patient.h
+	gcc $(FLAGS) $(INCLUDEPATHS) -o $(OBJ_DIR)/patient.o $(SRC_DIR)/patient.c
+
 
 
 dox:
@@ -104,6 +114,8 @@ splint:
 	splint $(SPLINTFLAGS) $(INCLUDEPATHS) $(SPLINCLUDEPATHS) $(SRC_DIR)/named_pipe.c
 	splint $(SPLINTFLAGS) $(INCLUDEPATHS) $(SPLINCLUDEPATHS) $(SRC_DIR)/sh_mem.c
 	splint $(SPLINTFLAGS) $(INCLUDEPATHS) $(SPLINCLUDEPATHS) $(SRC_DIR)/sh_sem.c
+	splint $(SPLINTFLAGS) $(INCLUDEPATHS) $(SPLINCLUDEPATHS) $(SRC_DIR)/opt.c
+	splint $(SPLINTFLAGS) $(INCLUDEPATHS) $(SPLINCLUDEPATHS) $(SRC_DIR)/patient.c
 
 clean:
 	rm -rf $(OBJ_DIR) $(DOX_DIR) $(EXE_DIR) $(OUT_DIR) 
