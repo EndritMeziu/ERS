@@ -88,7 +88,6 @@ int main (int argc, char *argv [])
           {
             printf ("[message received]: '%s'\n", shm_obj.shm_ptr->buffer);
 
-            
             memset (shm_obj.shm_ptr, 0x0, sizeof (shm_elm_t));
             shm_obj.shm_ptr->state = SHM_EMPTY;
             
