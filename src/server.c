@@ -18,10 +18,31 @@
 #include "sh_mem.h"
 #include "sh_sem.h"
 
+#include "opt.h"
+#include "str_serialize.h"
+#include "patient.h"
+
 int main (int argc, char *argv [])
 {
-
+  applOption  aoObj;
+  Patient_t    patient;
   
+  if ((char) opt_proc (argc, argv, &aoObj) == OPT_PROC_ERROR)
+    {
+      opt_free (&aoObj);
+      return EXIT_FAILURE;
+    }
+
+
+  printf ("\nThe file '%s' is opening ... \n", aoObj.f_name);
+  
+  if ((aoObj.fp = fopen (aoObj.f_name, "a+")) == NULL)
+  {
+    printf ("\nError opening the file: '%s' [Error string: '%s']",
+            aoObj.f_name, strerror (errno));
+    opt_free (&aoObj);
+    return -1;
+  }
   int r_qid;
   char buffer [SHM_MSG_LEN];
   
