@@ -66,29 +66,6 @@ int main (int argc, char *argv [])
     return -1;
   }
   
-
-  
-
-  msg_send(&msgobj);
-  while(Patient_read(aoObj.fp,&patient) == 1)
-  {  
-    
-    named_pipe_t npobj;
-    char *message = malloc(512);
-    strcpy(message,patient.ssec_no.p_str);
-    /*sprintf(message,"%d %s %s %s %s %s",patient.id,patient.name.p_str,
-    patient.surename.p_str,patient.age.p_str,patient.address.p_str,patient.date.p_str);
-*/
-
-    strncpy(npobj.msg, message, strlen(message));
-    sleep(0.001);
-    pipe_snd(msgobj.msg,&npobj);
-    
-    
-    
-  }
-
-
   if (aoObj.append == (char) OPT_SPECIFIED)
     {
       /* append a patient */
@@ -107,6 +84,38 @@ int main (int argc, char *argv [])
           return -1;
         }
     }
+
+  
+
+  msg_send(&msgobj);
+  
+  while(Patient_read(aoObj.fp,&patient) == 1)
+  {  
+    
+    named_pipe_t npobj;
+    char *message = malloc(512);
+    strcpy(message,patient.ssec_no.p_str);
+    /*sprintf(message,"%d %s %s %s %s %s",patient.id,patient.name.p_str,
+    patient.surename.p_str,patient.age.p_str,patient.address.p_str,patient.date.p_str);
+*/
+
+    strncpy(npobj.msg, message, 512);
+    sleep(0.001);
+    pipe_snd(msgobj.msg,&npobj);
+    
+    
+    
+  }
+  named_pipe_t npobj;
+  sleep(0.001);
+  char *finalMsg = malloc(512);
+  finalMsg = "END";
+  strncpy(npobj.msg, finalMsg, 512);
+  printf("NMPIPE:%s\n",npobj.msg);
+  pipe_snd(msgobj.msg,&npobj);
+
+
+  
   
   if (aoObj.list == (char) OPT_SPECIFIED)
     {

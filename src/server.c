@@ -18,31 +18,10 @@
 #include "sh_mem.h"
 #include "sh_sem.h"
 
-#include "opt.h"
-#include "str_serialize.h"
-#include "patient.h"
-
 int main (int argc, char *argv [])
 {
-  applOption  aoObj;
-  Patient_t    patient;
-  
-  if ((char) opt_proc (argc, argv, &aoObj) == OPT_PROC_ERROR)
-    {
-      opt_free (&aoObj);
-      return EXIT_FAILURE;
-    }
 
-
-  printf ("\nThe file '%s' is opening ... \n", aoObj.f_name);
   
-  if ((aoObj.fp = fopen (aoObj.f_name, "a+")) == NULL)
-  {
-    printf ("\nError opening the file: '%s' [Error string: '%s']",
-            aoObj.f_name, strerror (errno));
-    opt_free (&aoObj);
-    return -1;
-  }
   int r_qid;
   char buffer [SHM_MSG_LEN];
   
@@ -64,64 +43,88 @@ int main (int argc, char *argv [])
   printf("Waiting...\n");
  
   pid_t pid;
+  int status;
   while(msg_rcv(&msg_obj) != -1)
   {
-    printf("--------------------------------\n");
-    printf("Got message from message queue..\n");
-    printf("--------------------------------\n");
+    printf("----------------------------------\n");
+    printf("  Got message from message queue\n");
+    printf("----------------------------------\n");
+
     switch(pid = fork())
     {
       case 0:
-        for(;;)
+          /*conn_handler*/
+        while(1)
         {
-          pipe_rcv(msg_obj.msg,&npobj);
+          
+          int result = pipe_rcv(msg_obj.msg,&npobj);
           strncpy(buffer, npobj.msg,SHM_MSG_LEN);
-          printf("Mesazhi nga klienti:%s\n",npobj.msg);
-          printf("Mesazhi nga klienti:%d\n",npobj.len);
-        
+            /*Place in shared memory*/
           
-          if(shm_obj.shm_ptr->state == SHM_EMPTY)
+          while(1)
           {
-            if (sh_sem_lock (shm_obj.sem_id) == -1)
+            if(shm_obj.shm_ptr->state == SHM_EMPTY)
             {
-              perror ("Error entering the shared memory critical section");
-              exit (0);
+              
+              if (sh_sem_lock (shm_obj.sem_id) == -1)
+              {
+                perror ("Error entering the shared memory critical section");
+                exit (0);
+              }
+              strcpy (&shm_obj.shm_ptr->buffer [0], &buffer [0]);
+              shm_obj.shm_ptr->len = strlen (&buffer [0]);
+              
+              
+              
+              (void) sh_sem_unlock (shm_obj.sem_id);
+              memset (&buffer [0], 0x0, SHM_MSG_LEN);
+              shm_obj.shm_ptr->state = SHM_FULL;
+              break;
+              
             }
-
-            strcpy (&shm_obj.shm_ptr->buffer [0], &buffer [0]);
-            shm_obj.shm_ptr->len = strlen (&buffer [0]);
             
-            
-            
-            (void) sh_sem_unlock (shm_obj.sem_id);
-
-          
-            memset (&buffer [0], 0x0, SHM_MSG_LEN);
-            shm_obj.shm_ptr->state = SHM_FULL;
+               
           }
-          if (sh_sem_lock (shm_obj.sem_id) == -1)
+          if(strcmp(npobj.msg,"END") == 0)
           {
-            perror ("Error entering the shared memory critical section");
-            exit (EXIT_FAILURE);
+            printf("Arrived at the end conn_handler.\n");
+            break;
           }
           
-          if (shm_obj.shm_ptr->len > 0)
-          {
-            printf ("[message received]: '%s'\n", shm_obj.shm_ptr->buffer);
-
-            memset (shm_obj.shm_ptr, 0x0, sizeof (shm_elm_t));
-            shm_obj.shm_ptr->state = SHM_EMPTY;
-            
-            (void) sh_sem_unlock (shm_obj.sem_id);
-          }  
-            
         }
         exit(1);
       default:
         break; 
     }
+    while(1)
+    {
+      if(shm_obj.shm_ptr->state == SHM_FULL)
+      {
+        if(strcmp(shm_obj.shm_ptr->buffer,"END") == 0)
+        {
+          shm_obj.shm_ptr->state = SHM_EMPTY;
+           printf("Arrived at the end server.\n");
+          break;
+        }
+
+        if (sh_sem_lock (shm_obj.sem_id) == -1)
+        {
+          perror ("Error entering the shared memory critical section");
+          exit (EXIT_FAILURE);
+        }
+        if (shm_obj.shm_ptr->len > 0)
+        {
+          printf ("[message received]: '%s'\n", shm_obj.shm_ptr->buffer);
+
+          memset (shm_obj.shm_ptr, 0x0, sizeof (shm_elm_t));
+          shm_obj.shm_ptr->state = SHM_EMPTY;
+          (void) sh_sem_unlock (shm_obj.sem_id);
+        }
+        
+      }
+    }
+    
   }
-  
   return 0;
   
 }

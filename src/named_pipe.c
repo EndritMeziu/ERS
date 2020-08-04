@@ -59,6 +59,7 @@ int pipe_rcv(char* pipe_name,named_pipe_t *pipe_obj)
 {
 
     int fd;
+    
     if((fd = open(pipe_name,O_RDONLY)) < 0)
     {
         perror("Fifo open failed.\n");
