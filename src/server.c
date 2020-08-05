@@ -18,6 +18,10 @@
 #include "sh_mem.h"
 #include "sh_sem.h"
 
+#include "opt.h"
+#include "str_serialize.h"
+#include "patient.h"
+
 int main (int argc, char *argv [])
 {
 
@@ -28,6 +32,16 @@ int main (int argc, char *argv [])
   shared_mem_t shm_obj;
   msq_elem_t msg_obj;
   named_pipe_t npobj;
+  applOption aoObj;
+  
+  opt_init (&aoObj);
+
+   if ((char) opt_proc (argc, argv, &aoObj) == OPT_PROC_ERROR)
+  {
+    opt_free (&aoObj);
+    return EXIT_FAILURE;
+  }
+
   
   if((r_qid = init_queue()) == -1)
   {
@@ -43,6 +57,7 @@ int main (int argc, char *argv [])
   printf("Waiting...\n");
  
   pid_t pid;
+  pid_t previouspid;
   int status;
   while(msg_rcv(&msg_obj) != -1)
   {
@@ -57,7 +72,7 @@ int main (int argc, char *argv [])
         while(1)
         {
           
-          int result = pipe_rcv(msg_obj.msg,&npobj);
+          pipe_rcv(msg_obj.msg,&npobj);
           strncpy(buffer, npobj.msg,SHM_MSG_LEN);
             /*Place in shared memory*/
           
@@ -78,7 +93,10 @@ int main (int argc, char *argv [])
               
               (void) sh_sem_unlock (shm_obj.sem_id);
               memset (&buffer [0], 0x0, SHM_MSG_LEN);
-              shm_obj.shm_ptr->state = SHM_FULL;
+              if(strcmp(npobj.msg,"END") != 0)
+                shm_obj.shm_ptr->state = SHM_FULL;
+              else
+                previouspid = pid;
               break;
               
             }
@@ -87,7 +105,9 @@ int main (int argc, char *argv [])
           }
           if(strcmp(npobj.msg,"END") == 0)
           {
+            
             printf("Arrived at the end conn_handler.\n");
+            shm_obj.shm_ptr->state = SHM_FULL;
             break;
           }
           
@@ -96,14 +116,23 @@ int main (int argc, char *argv [])
       default:
         break; 
     }
+    if ((aoObj.fp = fopen (aoObj.f_name, "a+")) == NULL)
+    {
+      printf ("\nError opening the file: '%s' [Error string: '%s']",
+              aoObj.f_name, strerror (errno));
+      opt_free (&aoObj);
+      return -1;
+    }
+
     while(1)
     {
       if(shm_obj.shm_ptr->state == SHM_FULL)
       {
         if(strcmp(shm_obj.shm_ptr->buffer,"END") == 0)
         {
-          shm_obj.shm_ptr->state = SHM_EMPTY;
            printf("Arrived at the end server.\n");
+           waitpid(previouspid,&status,0);
+           shm_obj.shm_ptr->state = SHM_EMPTY;
           break;
         }
 
@@ -115,14 +144,17 @@ int main (int argc, char *argv [])
         if (shm_obj.shm_ptr->len > 0)
         {
           printf ("[message received]: '%s'\n", shm_obj.shm_ptr->buffer);
-
+          
+          fprintf(aoObj.fp,"%s",shm_obj.shm_ptr->buffer);
           memset (shm_obj.shm_ptr, 0x0, sizeof (shm_elm_t));
-          shm_obj.shm_ptr->state = SHM_EMPTY;
+          
           (void) sh_sem_unlock (shm_obj.sem_id);
+          shm_obj.shm_ptr->state = SHM_EMPTY;
         }
         
       }
     }
+    fclose(aoObj.fp);
     
   }
   return 0;

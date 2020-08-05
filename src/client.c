@@ -94,26 +94,22 @@ int main (int argc, char *argv [])
     
     named_pipe_t npobj;
     char *message = malloc(512);
-    strcpy(message,patient.ssec_no.p_str);
-    /*sprintf(message,"%d %s %s %s %s %s",patient.id,patient.name.p_str,
-    patient.surename.p_str,patient.age.p_str,patient.address.p_str,patient.date.p_str);
-*/
-
+    sprintf(message,"%s %s %s %s %d %s",patient.ssec_no.p_str,patient.person_id.p_str,
+    patient.disease_id.p_str,patient.location_id.p_str,patient.result,patient.date.p_str);
     strncpy(npobj.msg, message, 512);
-    sleep(0.001);
+    sleep(1);
     pipe_snd(msgobj.msg,&npobj);
-    
+    free(message);
     
     
   }
   named_pipe_t npobj;
-  sleep(0.001);
   char *finalMsg = malloc(512);
   finalMsg = "END";
   strncpy(npobj.msg, finalMsg, 512);
   printf("NMPIPE:%s\n",npobj.msg);
+  sleep(1);
   pipe_snd(msgobj.msg,&npobj);
-
 
   
   
