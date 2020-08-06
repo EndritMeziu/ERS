@@ -1,4 +1,3 @@
-
 #include<stdio.h>
 #include<sys/ipc.h>
 #include<sys/msg.h>
@@ -9,6 +8,7 @@
 #include<fcntl.h>
 #include<errno.h>
 #include <sys/stat.h>
+#include<sys/wait.h>
 
 #define QKEY (key_t)0105
 #define QPERM 0660
@@ -32,40 +32,58 @@ int main (int argc, char *argv [])
   applOption  aoObj;
   Patient_t    patient;
   msq_elem_t msgobj;
+ 
+  opt_init (&aoObj);
+
+  if ((char) opt_proc (argc, argv, &aoObj) == OPT_PROC_ERROR)
+  {
+    opt_free (&aoObj);
+    free(argv);
+    return EXIT_FAILURE;
+  }
+
+
+
   char *pipe = "nmpiped_";
   char *mypid = malloc(8);
+  memset(mypid, 0, 8);
   sprintf(mypid, "%d", getpid());
   char *pipename = malloc(1+strlen(pipe)+strlen(mypid));
+  memset(pipename, 0, 1+strlen(pipe)+strlen(mypid));
   strcat(pipename,pipe);
   strcat(pipename,mypid);
+  free(mypid);
   msgobj.p_id = getpid();
   msgobj.len = strlen(pipename);
-  strncpy(msgobj.msg,pipename,msgobj.len);
-  msgobj.msg[msgobj.len] = '\0';
+  
+  if(pipename != NULL && msgobj.len > 0)
+  {
+    strncpy(msgobj.msg,pipename,msgobj.len);
+    msgobj.msg[msgobj.len] = '\0';
+  }
+  else{
+    memset (msgobj.msg, 0, MSQ_LEN );
+  }
+  free(pipename);
 
   init_named_pipe(msgobj.msg);
   /* initialize the application option object */
-  opt_init (&aoObj);
-
   
-  
-  if ((char) opt_proc (argc, argv, &aoObj) == OPT_PROC_ERROR)
-    {
-      opt_free (&aoObj);
-      return EXIT_FAILURE;
-    }
-
-  /* open a file */
-  printf ("\nThe file '%s' is opening ... \n", aoObj.f_name);
-  
-  if ((aoObj.fp = fopen (aoObj.f_name, "a+")) == NULL)
+  if(aoObj.f_name != NULL)
   {
-    printf ("\nError opening the file: '%s' [Error string: '%s']",
-            aoObj.f_name, strerror (errno));
+    if ((aoObj.fp = fopen ("file.txt", "a+")) == NULL)
+    {
+      printf ("\nError opening the file: '%s' [Error string: '%s']",
+              aoObj.f_name, strerror (errno));
+      opt_free (&aoObj);
+      return -1;
+    }
+  }
+  else
+  {
     opt_free (&aoObj);
     return -1;
   }
-  
   if (aoObj.append == (char) OPT_SPECIFIED)
     {
       /* append a patient */
@@ -100,35 +118,20 @@ int main (int argc, char *argv [])
     sleep(1);
     pipe_snd(msgobj.msg,&npobj);
     free(message);
+    Patient_free(&patient);
     
     
   }
   named_pipe_t npobj;
-  char *finalMsg = malloc(512);
-  finalMsg = "END";
+
+  char *finalMsg = "END";
   strncpy(npobj.msg, finalMsg, 512);
   printf("NMPIPE:%s\n",npobj.msg);
   sleep(1);
   pipe_snd(msgobj.msg,&npobj);
-
   
-  
-  if (aoObj.list == (char) OPT_SPECIFIED)
-    {
-       
-      
-       printf ("\n\nThe content of the file: \n"); 
-       
-       /*Print every record of the file*/
-       
-       
-     
-           
-    }
-
   /* release all resources */ 
-  (void) opt_free (&aoObj);
-   
+  opt_free (&aoObj);
   return 0;
 }
 

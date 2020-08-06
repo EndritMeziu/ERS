@@ -134,5 +134,6 @@ int str_read (FILE *fp, /*@null@*/ CString_t *const dst)
   
   dst->length = s_len;
   dst->p_str  = ptr;
+  
   return status;
 }

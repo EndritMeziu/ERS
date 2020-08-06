@@ -151,7 +151,7 @@ int opt_strclone (/*@out@*/ char **dest, const char *src)
     {
       *ptr++ = *src++;
     }
-
+  
   return (int) OPT_SUCCESS;
 }
 

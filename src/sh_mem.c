@@ -52,3 +52,18 @@ int shm_init  (shared_mem_t *shm_obj)
 
   return 0;
 }
+
+void shm_free(shared_mem_t * shm_obj)
+{
+  shm_obj->sem_id = -1;
+  shm_obj->shm_id = -1;
+  shm_obj->shm_ptr->len = -1;
+
+  if(shm_obj->shm_ptr->buffer != NULL)
+    {
+        free(shm_obj->shm_ptr->buffer);
+        memset(shm_obj->shm_ptr->buffer,0,512);
+    }
+
+
+}

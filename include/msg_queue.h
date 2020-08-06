@@ -24,5 +24,5 @@ typedef struct _msq_elem
 int init_queue();
 int msg_send(msq_elem_t *msg_obj);
 int msg_rcv(msq_elem_t *msg_obj);
-
+void msg_free(msq_elem_t *msg_obj);
 #endif

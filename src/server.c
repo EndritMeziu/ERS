@@ -57,7 +57,7 @@ int main (int argc, char *argv [])
   printf("Waiting...\n");
  
   pid_t pid;
-  pid_t previouspid;
+  pid_t previouspid = -1;
   int status;
   while(msg_rcv(&msg_obj) != -1)
   {
@@ -93,6 +93,7 @@ int main (int argc, char *argv [])
               
               (void) sh_sem_unlock (shm_obj.sem_id);
               memset (&buffer [0], 0x0, SHM_MSG_LEN);
+              
               if(strcmp(npobj.msg,"END") != 0)
                 shm_obj.shm_ptr->state = SHM_FULL;
               else
@@ -101,8 +102,8 @@ int main (int argc, char *argv [])
               
             }
             
-               
           }
+          
           if(strcmp(npobj.msg,"END") == 0)
           {
             
@@ -112,11 +113,12 @@ int main (int argc, char *argv [])
           }
           
         }
+
         exit(1);
       default:
         break; 
     }
-    if ((aoObj.fp = fopen (aoObj.f_name, "a+")) == NULL)
+    if ((aoObj.fp = fopen ("fileser.txt", "a+")) == NULL)
     {
       printf ("\nError opening the file: '%s' [Error string: '%s']",
               aoObj.f_name, strerror (errno));
@@ -153,10 +155,15 @@ int main (int argc, char *argv [])
         }
         
       }
+      
     }
-    fclose(aoObj.fp);
+    opt_free (&aoObj);
+
     
-  }
+  } 
+  msg_free(&msg_obj);
+  shm_free(&shm_obj);
+  opt_free (&aoObj);
   return 0;
   
 }

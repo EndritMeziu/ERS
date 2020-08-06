@@ -19,7 +19,7 @@ typedef struct _sh_mem_elm
 {
   char state;
   int len;
-  char   buffer [SHM_MSG_LEN];
+  char buffer [SHM_MSG_LEN];
   
 } shm_elm_t;
 
@@ -33,6 +33,7 @@ typedef struct _shared_mem
 
 /* public interface functions */
 int  shm_init     (/*@out@*/ shared_mem_t * shm_obj);
+void shm_free(shared_mem_t * shm_obj);
 #endif /* _SH_MEM__H */
 
  
