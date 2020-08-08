@@ -157,12 +157,14 @@ int main (int argc, char *argv [])
       }
       
     }
+    fclose(aoObj.fp);
     opt_free (&aoObj);
 
     
   } 
   msg_free(&msg_obj);
   shm_free(&shm_obj);
+  fclose(aoObj.fp);
   opt_free (&aoObj);
   return 0;
   

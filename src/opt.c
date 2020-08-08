@@ -7,7 +7,8 @@
 #include <getopt.h>
 #include <unistd.h>
 #include <libgen.h>
-
+#include <ctype.h>
+#include <stdbool.h>
 #include "opt.h"
 
 extern char *optarg;
@@ -40,7 +41,7 @@ void opt_init  (/*@out@*/applOption *aoObj)
     }
   
   aoObj->append      = OPT_NOTSPECIFIED;
-  aoObj->list        = OPT_NOTSPECIFIED;
+  aoObj->time        = 1;
   aoObj->f_name      = NULL;
   aoObj->fp          = NULL;
 }
@@ -58,7 +59,7 @@ void opt_free  (/*@out@*/applOption *aoObj)
     }
   
   aoObj->append      = OPT_NOTSPECIFIED;
-  aoObj->list        = OPT_NOTSPECIFIED;
+  aoObj->time        = 1;
 
   if (aoObj->f_name != NULL)
     {
@@ -83,7 +84,7 @@ int opt_proc (int argc, char *argv [], /*@out@*/applOption *aoObj)
     }
   
   /* while ((n_opt = getopt (argc, argv, OPT_PATTERN)) != -1) */
-  while ((n_opt = getopt (argc, argv, "af:hl")) != -1)
+  while ((n_opt = getopt (argc, argv, "af:ht")) != -1)
     {
       switch (n_opt)
         {
@@ -92,8 +93,7 @@ int opt_proc (int argc, char *argv [], /*@out@*/applOption *aoObj)
             {
               return (int) OPT_PROC_ERROR;
             }
-          break;
-          
+          break;  
         case 'a':
           aoObj->append = OPT_SPECIFIED;
           break;
@@ -102,8 +102,17 @@ int opt_proc (int argc, char *argv [], /*@out@*/applOption *aoObj)
           opt_usage (argv [0]);
           break;
           
-        case 'l':
-          aoObj->list = OPT_SPECIFIED;
+        case 't':
+          if(isNumber(argv[4]))
+          {
+              aoObj->time = atoi(argv[4]);
+              printf("Argumenti:%s\n",argv[4]);
+          }
+          else{
+            printf ("Wrong argument\n");
+            opt_usage (argv [0]);
+          }
+          
           break;
           
         case '?':
@@ -162,9 +171,28 @@ void opt_usage (const char *app_name)
   printf ("\n%s - The first exercise in the sys prog lecture\n", a_name);
   printf ("\nSYNOPSIS\n");
   printf ("\t%s [OPTION] ... \n", a_name);
-  printf ("\t -f arg, (mandatory) the file name \n");
-  printf ("\t -a,     (optional) append a patient to the file \n");
-  printf ("\t -l,     (optional) list all patients stored in the file \n\n");
+  printf ("\t -f arg, (mandatory) the file which contains messages \n");
+  printf ("\t -t arg,     (optional) The number of seconds to wait \n\n");
 
   exit (EXIT_FAILURE);
+}
+
+bool isNumber(char number[])
+{
+    if(number != NULL)
+    {
+      int i = 0;
+      if (number[0] == '-')
+          i = 1;
+      for (; number[i] != 0; i++)
+      {
+          
+          if (!isdigit(number[i]))
+              return false;
+      }
+      return true;
+    }
+    else
+      return false;
+    
 }
