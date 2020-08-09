@@ -162,7 +162,7 @@ int Patient_write (FILE *fp,  Patient_t *patient)
 
   if (status == 0)
     {
-       printf ("\nError writing patient result '%d' to the file", patient->result);
+       printf ("\nError writing patient result to the file");
        return status;
     }
 

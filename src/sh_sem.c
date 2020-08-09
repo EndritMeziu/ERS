@@ -25,7 +25,7 @@ int sh_sem_init  (key_t semkey)
     {
       semun semopts;    
       semopts.val = 1;
-      semctl (semid, 0, SETVAL, semopts);
+      (void)semctl (semid, 0, SETVAL, semopts);
     }
   
 

@@ -92,7 +92,6 @@ void msg_free(msq_elem_t *msg_obj)
     msg_obj->len = -1;
     if(msg_obj->msg != NULL)
     {
-        free(msg_obj->msg);
         memset(msg_obj->msg,0,30);
     }
     

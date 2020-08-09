@@ -2,6 +2,7 @@
 #ifndef _MSG_QUEUE__H
 #define _MSG_QUEUE__H 1
 
+/*@-skipposixheaders@*/
 #include <sys/types.h>
 #include <sys/ipc.h>
 

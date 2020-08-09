@@ -1,9 +1,5 @@
-#ifndef SH_SEM_H_
-#define SH_SEM_H_ 1
-
-#include <sys/types.h>
-#include <sys/ipc.h>
-#include <sys/sem.h>
+#ifndef _SH_SEM_H_
+#define _SH_SEM_H_ 1
 
 #define SEMPERM 0600
 
@@ -14,11 +10,11 @@ typedef union _semun
   unsigned short  *array;  /* Array for GETALL, SETALL */
 } semun;
 
-/* public interface functions */
-int sh_sem_init   (key_t semkey);
-int sh_sem_lock   (int   semid);
-int sh_sem_unlock (int   semid);
 
-#endif /* SH_SEM_H_ */
+int sh_sem_lock(int   semid);
+int sh_sem_init(key_t semkey);
+int sh_sem_unlock(int   semid);
+
+#endif /* _SH_SEM_H_ */
 
  

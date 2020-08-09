@@ -22,5 +22,4 @@ typedef struct named_pipe_
 int init_named_pipe(char *pipe_name);
 int pipe_snd(char* pipe_name,named_pipe_t *pipe_obj);
 int pipe_rcv(char* pipe_name,named_pipe_t *pipe_obj);
-
 #endif

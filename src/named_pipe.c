@@ -50,7 +50,7 @@ int pipe_snd(char* pipe_name,named_pipe_t *pipe_obj)
         perror("Error writing to pipe.\n");
         exit(0);
     } 
-    close(fd);
+    (void)close(fd);
     return 1;
 }
 
@@ -77,6 +77,6 @@ int pipe_rcv(char* pipe_name,named_pipe_t *pipe_obj)
         perror("Error reading the pipe.\n");
         exit(0);
     }
-    close(fd);
+    (void)close(fd);
     return 1;
 }

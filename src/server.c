@@ -3,12 +3,12 @@
 #include<sys/msg.h>
 #include<stdlib.h>
 #include<string.h>
-#include<unistd.h>
-#include<sys/types.h>
-#include<fcntl.h>
 #include<errno.h>
-#include <sys/stat.h>
 #include<sys/wait.h>
+#include <stdbool.h>
+/*@-skipposixheaders@*/
+#include <sys/types.h>
+#include <unistd.h>
 
 #define MSQ_LEN 30
 #define NAMED_PIPE_MSG_LEN 512
@@ -56,8 +56,8 @@ int main (int argc, char *argv [])
   
   printf("Waiting...\n");
  
-  pid_t pid;
-  pid_t previouspid = -1;
+  int pid;
+  int previouspid = -1;
   int status;
   while(msg_rcv(&msg_obj) != -1)
   {
@@ -69,14 +69,18 @@ int main (int argc, char *argv [])
     {
       case 0:
           /*conn_handler*/
-        while(1)
+        while(true)
         {
           
-          pipe_rcv(msg_obj.msg,&npobj);
+          if((pipe_rcv(msg_obj.msg,&npobj)) != 1)
+          {
+            perror("Error receiving data forom pipe.\n");
+            exit(0);
+          }
           strncpy(buffer, npobj.msg,SHM_MSG_LEN);
             /*Place in shared memory*/
           
-          while(1)
+          while(true)
           {
             if(shm_obj.shm_ptr->state == SHM_EMPTY)
             {
@@ -87,9 +91,7 @@ int main (int argc, char *argv [])
                 exit (0);
               }
               strcpy (&shm_obj.shm_ptr->buffer [0], &buffer [0]);
-              shm_obj.shm_ptr->len = strlen (&buffer [0]);
-              
-              
+              shm_obj.shm_ptr->len = (int)strlen (&buffer [0]);  
               
               (void) sh_sem_unlock (shm_obj.sem_id);
               memset (&buffer [0], 0x0, SHM_MSG_LEN);
@@ -113,8 +115,7 @@ int main (int argc, char *argv [])
           }
           
         }
-
-        exit(1);
+        exit(0);
       default:
         break; 
     }
@@ -126,14 +127,14 @@ int main (int argc, char *argv [])
       return -1;
     }
 
-    while(1)
+    while(true)
     {
       if(shm_obj.shm_ptr->state == SHM_FULL)
       {
         if(strcmp(shm_obj.shm_ptr->buffer,"END") == 0)
         {
            printf("Arrived at the end server.\n");
-           waitpid(previouspid,&status,0);
+           (void) waitpid(previouspid,&status,0);
            shm_obj.shm_ptr->state = SHM_EMPTY;
           break;
         }
@@ -157,14 +158,14 @@ int main (int argc, char *argv [])
       }
       
     }
-    fclose(aoObj.fp);
+    (void)fclose(aoObj.fp);
     opt_free (&aoObj);
 
     
   } 
   msg_free(&msg_obj);
   shm_free(&shm_obj);
-  fclose(aoObj.fp);
+  (void)fclose(aoObj.fp);
   opt_free (&aoObj);
   return 0;
   

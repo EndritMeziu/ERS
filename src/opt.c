@@ -184,7 +184,7 @@ bool isNumber(char number[])
       int i = 0;
       if (number[0] == '-')
           i = 1;
-      for (; number[i] != 0; i++)
+      for (; number[i] != '\0'; i++)
       {
           
           if (!isdigit(number[i]))

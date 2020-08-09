@@ -61,8 +61,8 @@ void shm_free(shared_mem_t * shm_obj)
 
   if(shm_obj->shm_ptr->buffer != NULL)
     {
-        free(shm_obj->shm_ptr->buffer);
-        memset(shm_obj->shm_ptr->buffer,0,512);
+      memset(shm_obj->shm_ptr->buffer,0,512);
+        
     }
 
 
